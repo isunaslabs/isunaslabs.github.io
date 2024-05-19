@@ -1,1 +1,132 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Number Extractor</title>
+    <style>
+        .sent {
+            text-decoration: none;
+            color: gray;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <textarea id="editor" placeholder="Paste Your Log.html content" style="width: 100%; height: 400px"></textarea>
+</div>
+
+<div id="unique-phones-counter"></div>
+<div id="sent-numbers-counter"></div>
+
+<div id="whatsapp"></div>
+
+<script>
+    const textArea = document.getElementById("editor");
+    const output = document.getElementById("whatsapp");
+    const totalCustomers = document.getElementById("unique-phones-counter");
+    const sentNumbers = document.getElementById("sent-numbers-counter");
+    let sentPhoneNumbers = [];
+    const PHONE_STORAGE_KEY = "sentPhoneNumbers"
+    const phoneStorage = localStorage.getItem(PHONE_STORAGE_KEY);
+
+    if(phoneStorage) {
+        sentPhoneNumbers = JSON.parse(phoneStorage);
+    }
+
+    textArea.addEventListener("input", (e)=> {
+        const value = e.target.value.trim();
+        if(value.length > 0) {
+            const itemsArray = value.split("====================Log Message Ends====================");
+            let phonesObj = {};
+            itemsArray.forEach((singleItem, index)=> {
+                const itemSplit = singleItem.split("Click here to clear everything");
+                if(itemSplit.length > 0) {
+                    const firstItem = itemSplit[0];
+                    const nameAndNumberSplit = firstItem.split("Message:");
+                    if(nameAndNumberSplit.length > 1) {
+                        const nameAndNumber = nameAndNumberSplit[1];
+                        const initialPhoneZeroIndex = nameAndNumber.indexOf(" 0");
+                        const initialPhonePlusIndex = nameAndNumber.indexOf(" +");
+                        let phoneStartIndex = 0;
+                        if(initialPhoneZeroIndex > -1) {
+                            //it starts with 0
+                            phoneStartIndex = initialPhoneZeroIndex;
+                        } else {
+                            //it starts with +
+                            phoneStartIndex = initialPhonePlusIndex
+                        }
+                        const name = nameAndNumber.substring(0, phoneStartIndex).trim();
+                        const phoneString = nameAndNumber.substring(phoneStartIndex, nameAndNumber.length).trim();
+                        const phonesArray = phoneString.split("/");
+                        let phonesWithCountryCode = [];
+                        phonesArray.forEach((phone)=> {
+                            //only take phone numbers when they start with 0 or + sign
+                            if(phone.startsWith("0")) {
+                                phonesWithCountryCode.push(phone.replace("0", "+255"))
+                            } else if(phone.startsWith("+")) {
+                                phonesWithCountryCode.push(phone)
+                            }
+                        });
+                        if(phonesWithCountryCode.length > 0) {
+                            phonesObj[name] = {
+                                name,
+                                phone: phonesWithCountryCode
+                            }
+                        }
+                    }
+                }
+            });
+            const uniqueCustomers = [];
+            for(let key in phonesObj) {
+                uniqueCustomers.push(phonesObj[key]);
+            }
+
+            output.innerHTML = "";
+
+            //create HTML
+            uniqueCustomers.forEach((item)=> {
+                const divWrapper = document.createElement("div");
+                divWrapper.style.paddingTop = "10px";
+                const nameDiv = document.createElement("div");
+                nameDiv.innerHTML = item.name;
+                divWrapper.append(nameDiv);
+                item.phone.forEach((phone)=> {
+                    const link = document.createElement("a");
+                    link.style.display = "block";
+                    link.style.paddingTop = "2px";
+                    link.style.paddingBottom = "2px";
+                    link.innerText = `Send WhatsApp To ${phone}`;
+                    const messageToCustomer = `Habari yako ${item.name}? Karibu uendelee kusafirisha mizigo yako nasi kwa ndege ✈️ toka China 🇨🇳 kuja Tanzania 🇹🇿 kwa Haraka ⚡️ Na Nafuu 💰. Flight ✈️ yetu inayofuata ni hii hapa https://www.umojaexpresscargo.com/single-post?id=6wk56sark3
+
+Ukitaka kijifunza jinsi ya kutumia Alibaba kununua bidhaa kwa rejareja kwa nafuu fungua link hii https://www.umojaexpresscargo.com/single-post?id=e7tyr6tmp6`;
+                    link.setAttribute("href",`https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(messageToCustomer)}`);
+                    link.setAttribute("target", "_blank");
+                    if(sentPhoneNumbers.indexOf(phone) > -1) {
+                        link.classList.add("sent");
+                    }
+                    link.addEventListener("click", () => {
+                        sentPhoneNumbers.push(phone);
+                        localStorage.setItem(PHONE_STORAGE_KEY, JSON.stringify(sentPhoneNumbers));
+                        link.classList.add("sent");
+                        sentNumbers.innerText = `Messaged Phone Numbers = ${sentPhoneNumbers.length}`;
+                    })
+                    divWrapper.append(link);
+                })
+                output.append(divWrapper);
+            });
+
+            totalCustomers.innerText = `Total Customers = ${uniqueCustomers.length}`;
+            sentNumbers.innerText = `Messaged Phone Numbers = ${sentPhoneNumbers.length}`;
+        } else {
+            output.innerHTML = "";
+            totalCustomers.innerText = `Total Customers = 0`;
+            sentNumbers.innerText = `Messaged Phone Numbers = 0`;
+        }
+    })
+
+</script>
+
+</body>
+</html>
