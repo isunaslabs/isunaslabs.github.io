@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Extractor</title>
     <style>
-        body {
-            padding: 15px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .wrapper {
+            padding: 10px;
         }
         .sent {
             text-decoration: none;
@@ -16,12 +22,10 @@
             background-color: deepskyblue;
             border: none;
             color: white;
-            padding-left: 10px;
-            padding-right: 10px;
-            padding-top: 5px;
-            padding-bottom: 5px;
+            padding: 8px 12px;
             margin-top: 10px;
             margin-bottom: 10px;
+            border-radius: 6px;
         }
         .button:disabled {
             background-color: gray;
@@ -30,16 +34,18 @@
 </head>
 <body>
 
-<div>
-    <textarea id="editor" placeholder="Paste Your Log.html content" style="width: 100%; height: 400px"></textarea>
+<div class="wrapper">
+    <div style="width: 100%;">
+        <textarea id="editor" placeholder="Paste Your Log.html content" style="width: 100%; height: 250px; border-radius: 6px; padding: 8px;"></textarea>
+    </div>
+
+    <button class="button" id="btn" onclick="fetchServerText()">Get Server Text</button>
+
+    <div id="unique-phones-counter"></div>
+    <div id="sent-numbers-counter"></div>
+
+    <div id="whatsapp"></div>
 </div>
-
-<button class="button" id="btn" onclick="fetchServerText()">Get Server Text</button>
-
-<div id="unique-phones-counter"></div>
-<div id="sent-numbers-counter"></div>
-
-<div id="whatsapp"></div>
 
 <script>
     const btn = document.getElementById("btn");
@@ -108,7 +114,7 @@
             //create HTML
             uniqueCustomers.forEach((item)=> {
                 const divWrapper = document.createElement("div");
-                divWrapper.style.paddingTop = "10px";
+                divWrapper.style.paddingTop = "30px";
                 const nameDiv = document.createElement("div");
                 nameDiv.innerHTML = item.name;
                 divWrapper.append(nameDiv);
