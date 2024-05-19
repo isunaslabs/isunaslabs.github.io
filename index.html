@@ -4,10 +4,27 @@
     <meta charset="UTF-8">
     <title>Number Extractor</title>
     <style>
+        body {
+            padding: 15px;
+        }
         .sent {
             text-decoration: none;
             color: gray;
             font-style: italic;
+        }
+        .button {
+            background-color: deepskyblue;
+            border: none;
+            color: white;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .button:disabled {
+            background-color: gray;
         }
     </style>
 </head>
@@ -17,12 +34,15 @@
     <textarea id="editor" placeholder="Paste Your Log.html content" style="width: 100%; height: 400px"></textarea>
 </div>
 
+<button class="button" id="btn" onclick="fetchServerText()">Get Server Text</button>
+
 <div id="unique-phones-counter"></div>
 <div id="sent-numbers-counter"></div>
 
 <div id="whatsapp"></div>
 
 <script>
+    const btn = document.getElementById("btn");
     const textArea = document.getElementById("editor");
     const output = document.getElementById("whatsapp");
     const totalCustomers = document.getElementById("unique-phones-counter");
@@ -124,7 +144,26 @@ Ukitaka kijifunza jinsi ya kutumia Alibaba kununua bidhaa kwa rejareja kwa nafuu
             totalCustomers.innerText = `Total Customers = 0`;
             sentNumbers.innerText = `Messaged Phone Numbers = 0`;
         }
-    })
+    });
+
+
+    const fetchServerText = () => {
+        btn.setAttribute("disabled", true);
+        btn.innerText = "Please Wait..."
+        fetch('https://api.umojaexpresscargo.com/address-log.html') // api for the get request
+            .then(response => response.text())
+            .then(html => {
+                const wrapper = document.createElement("div");
+                wrapper.innerHTML = html;
+                textArea.innerText = wrapper.innerText.trim();
+                textArea.dispatchEvent(new Event("input"));
+                btn.innerText = "Get Server Text";
+                btn.removeAttribute("disabled");
+            }).catch(()=> {
+            btn.innerText = "Get Server Text";
+            btn.removeAttribute("disabled");
+        });
+    }
 
 </script>
 
